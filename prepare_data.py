@@ -5,7 +5,6 @@ import gc
 # import tqdm
 import numpy as np
 import pandas as pd
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -32,7 +31,7 @@ def prepare():
     return train_df
 
 
-# if __name__ == "__main__":
-#     root = 'input'
-#     output = 'processed'
-#     prepare(root, output)
+if __name__ == "__main__":
+    root = 'input'
+    output = 'processed'
+    prepare(root, output)
