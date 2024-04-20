@@ -16,6 +16,7 @@ def fit_lgbm(train_df):
     # features and target vars
     target = np.log1p(train_df["meter_reading"])
     features = train_df.drop('meter_reading', axis = 1)
+    print(features.head())
     del train_df
     gc.collect()
 
@@ -39,7 +40,7 @@ def fit_lgbm(train_df):
         test_target = target.loc[test_index]
         d_training = lgb.Dataset(train_features, label=train_target,categorical_feature=categorical_features, free_raw_data=False)
         d_test = lgb.Dataset(test_features, label=test_target,categorical_feature=categorical_features, free_raw_data=False)
-        model = lgb.train(params, train_set=d_training, num_boost_round=1000, valid_sets=[d_training,d_test], verbose_eval=25, early_stopping_rounds=50)
+        model = lgb.train(params, train_set=d_training, num_boost_round=1000, valid_sets=[d_training,d_test], verbose_eval=True, early_stopping_rounds=50)
         models.append(model)
         del train_features, train_target, test_features, test_target, d_training, d_test
         gc.collect()
@@ -71,8 +72,9 @@ if __name__ == "__main__":
     train, test = prepare()
     train.to_csv("data/train_with_features.csv")
     train = pd.read_csv("data/train_with_features.csv")
+    train = train.drop('Unnamed: 0', axis=1)
     print(train.head())
-    apply_lgbm(train)
+    apply_lgbm(train, None)
 
     
 

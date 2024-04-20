@@ -46,10 +46,9 @@ def prepare():
     train_df["primary_use"] = le.fit_transform(train_df["primary_use"])
 
     # Deal with missing values
-    # train_df = train_df.fillna(train_df.mean())    
 
     # Columns to drop
-    drop_cols = ["sea_level_pressure", "wind_speed"]
+    drop_cols = ["sea_level_pressure", "wind_speed", "timestamp"]
     train_df = train_df.drop(drop_cols, axis = 1)
 
     return train_df, test_df
