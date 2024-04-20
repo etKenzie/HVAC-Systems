@@ -20,7 +20,8 @@ def fit_lgbm(train_df):
     del train_df
     gc.collect()
 
-    categorical_features = ["building_id", "site_id", "meter", "primary_use", "weekend"]
+    categorical_features = ["building_id", "site_id", "meter", "primary_use"]
+
     params = {
         "objective": "regression",
         "boosting": "gbdt",
@@ -52,9 +53,9 @@ def apply_lgbm(train_df, test_df):
     models = fit_lgbm(train_df)
     
     # Showing feature importances
-    for model in models:
+    for i, model in enumerate(models):
         lgb.plot_importance(model)
-        plt.show()    
+        plt.savefig(f'plots/feature_importance{i+1}')
 
     results = []
     for model in models:
@@ -65,16 +66,22 @@ def apply_lgbm(train_df, test_df):
         del model
         gc.collect()
     
+    results_df = pd.DataFrame({"row_id": row_ids, "meter_reading": np.clip(results, 0, a_max=None)})
+    del row_ids,results
+    gc.collect()
+    results_df.to_csv("submission.csv", index=False)
 
 
 if __name__ == "__main__":
     # print(os.getcwd())
-    train, test = prepare()
-    train.to_csv("data/train_with_features.csv")
+    # train, test = prepare()
+    # train.to_csv("data/train_with_features.csv", index=False)
+    # test.to_csv("data/test_with_features.csv", index = False)
     train = pd.read_csv("data/train_with_features.csv")
-    train = train.drop('Unnamed: 0', axis=1)
+    test = pd.read_csv("data/test_with_features.csv")
+
     print(train.head())
-    apply_lgbm(train, None)
+    apply_lgbm(train, test)
 
     
 
