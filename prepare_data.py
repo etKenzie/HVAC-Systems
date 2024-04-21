@@ -46,15 +46,32 @@ def prepare():
 
     # Prepare the test df
     test_df = pd.read_csv(os.path.join(path, 'test.csv'))
+    row_ids = test_df["row_id"]
     test_df.drop("row_id", axis=1, inplace=True)
-    test_df = test_df.merge(buildings_df,left_on='building_id',right_on='building_id',how='left')
-    del buildings_df
-    gc.collect()
+    test_df = reduce_mem_usage(test_df)
+    
+    
     weather_test_df = pd.read_csv(os.path.join(path + 'weather_test.csv'))
     weather_test_df = fill_weather_dataset(weather_test_df)
     weather_test_df = reduce_mem_usage(weather_test_df)
 
-    return train_df, test_df
+    test_df = test_df.merge(buildings_df,left_on='building_id',right_on='building_id',how='left')
+    test_df  = test_df.merge(weather_test_df, on=['site_id', 'timestamp'], how='left')
+    del buildings_df, weather_test_df, weather_train_df
+    gc.collect()
+
+    # Label encoder
+    le = LabelEncoder()
+    test_df["primary_use"] = le.fit_transform(test_df["primary_use"])
+
+    # Columns to drop
+    drop_cols = ["sea_level_pressure", "wind_speed", "timestamp"]
+    test_df = test_df.drop(drop_cols, axis = 1)
+
+    # building_id,meter,meter_reading,site_id,primary_use,square_feet,year_built,floor_count,air_temperature,cloud_coverage,dew_temperature,precip_depth_1_hr,wind_direction
+    # row_id,building_id,meter,site_id,primary_use,square_feet,year_built,floor_count,air_temperature,cloud_coverage,dew_temperature,precip_depth_1_hr,wind_direction
+
+    return train_df, test_df, row_ids
 
 
 def add_features():
